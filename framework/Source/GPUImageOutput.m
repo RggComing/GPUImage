@@ -29,20 +29,14 @@ void runOnMainQueueWithoutDeadlocking(void (^block)(void))
 void runSynchronouslyOnVideoProcessingQueue(void (^block)(void))
 {
     dispatch_queue_t videoProcessingQueue = [GPUImageContext sharedContextQueue];
-#if !OS_OBJECT_USE_OBJC
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    if (dispatch_get_current_queue() == videoProcessingQueue)
-#pragma clang diagnostic pop
-#else
-	if (dispatch_get_specific([GPUImageContext contextKey]))
-#endif
-	{
-		block();
-	}else
-	{
-		dispatch_sync(videoProcessingQueue, block);
-	}
+    const char *curLabel = dispatch_queue_get_label(dispatch_get_current_queue());
+    const char *videoLabel = dispatch_queue_get_label(videoProcessingQueue);
+    
+    if (!strcmp(curLabel, videoLabel) || [NSThread isMainThread]) {
+        block();
+    } else {
+        dispatch_sync(videoProcessingQueue, block);
+    }
 }
 
 void runAsynchronouslyOnVideoProcessingQueue(void (^block)(void))

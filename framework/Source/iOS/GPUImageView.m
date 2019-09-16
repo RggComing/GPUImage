@@ -235,12 +235,20 @@
     runSynchronouslyOnVideoProcessingQueue(^{
         CGFloat heightScaling, widthScaling;
         
-        CGSize currentViewSize = self.bounds.size;
+//        CGSize currentViewSize = self.bounds.size;
+//
+//        //    CGFloat imageAspectRatio = inputImageSize.width / inputImageSize.height;
+//        //    CGFloat viewAspectRatio = currentViewSize.width / currentViewSize.height;
+//
+//        CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, self.bounds);
         
-        //    CGFloat imageAspectRatio = inputImageSize.width / inputImageSize.height;
-        //    CGFloat viewAspectRatio = currentViewSize.width / currentViewSize.height;
-        
-        CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, self.bounds);
+        __block CGSize currentViewSize;
+        __block CGRect insetRect;
+        runOnMainQueueWithoutDeadlocking(^{
+            currentViewSize = self.bounds.size;
+            
+            insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, self.bounds);
+        });
         
         switch(_fillMode)
         {
